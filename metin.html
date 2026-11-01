@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mizo Hotel Oda Checklist</title>
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --text-color: #2c3e50;
+            --bath-color: #e8f4f8;
+            --bath-border: #bce0ee;
+            --bed-color: #fcf3ec;
+            --bed-border: #f8dcd0;
+            --accent: #34c759;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 36px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            padding: 20px 16px;
+            max-height: 94vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        header p {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* Oda Sekmeleri */
+        .room-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .room-tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            padding: 8px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-color);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: #007aff;
+            color: #fff;
+            border-color: #007aff;
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+        }
+
+        .scroll-area {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 2px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 12px 0 6px 4px;
+            color: #555;
+            letter-spacing: 0.5px;
+        }
+
+        .checklist-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .task-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+            cursor: pointer;
+        }
+
+        .bath-task { background-color: var(--bath-color); border-color: var(--bath-border); }
+        .bed-task { background-color: var(--bed-color); border-color: var(--bed-border); }
+
+        .task-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-color);
+            flex-grow: 1;
+        }
+
+        /* HTML Checkbox Stili */
+        .task-card input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            accent-color: #34c759;
+            cursor: pointer;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .reset-btn {
+            flex: 1;
+            padding: 11px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #ff3b30;
+            cursor: pointer;
+        }
+
+        /* Pop-up */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            display: none;
+            border-radius: 36px;
+            z-index: 100;
+        }
+
+        .modal-card {
+            background: white;
+            width: 85%;
+            padding: 24px;
+            border-radius: 24px;
+            text-align: center;
+        }
+
+        .modal-btn {
+            background: #34c759;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            margin-top: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        <header>
+            <h1>Mizo Hotel Oda Checklist</h1>
+            <p>Hızlı ve Kusursuz Temizlik Takibi</p>
+        </header>
+
+        <!-- Oda Sekmeleri -->
+        <div class="room-tabs">
+            <button class="tab-btn active" onclick="selectTab(this, '701')">Oda 701</button>
+            <button class="tab-btn" onclick="selectTab(this, '702')">Oda 702</button>
+            <button class="tab-btn" onclick="selectTab(this, '703')">Oda 703</button>
+            <button class="tab-btn" onclick="selectTab(this, '704')">Oda 704</button>
+            <button class="tab-btn" onclick="selectTab(this, '705')">Oda 705</button>
+            <button class="tab-btn" onclick="selectTab(this, '707')">Oda 707</button>
+            <button class="tab-btn" onclick="selectTab(this, '708')">Oda 708</button>
+            <button class="tab-btn" onclick="selectTab(this, '709')">Oda 709</button>
+            <button class="tab-btn" onclick="selectTab(this, '710')">Oda 710</button>
+        </div>
+
+        <div class="scroll-area">
+            <!-- BANYO -->
+            <div class="section-title">🚿 Banyo Kontrolleri</div>
+            <div class="checklist-group">
+                <label class="task-card bath-task"><span class="task-label">Havlular</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bath-task"><span class="task-label">Duş süngeri</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bath-task"><span class="task-label">Sabun, Şampuan ve Duş Jeli</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bath-task"><span class="task-label">Banyo çöpü</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bath-task"><span class="task-label">Aynaları sil</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bath-task"><span class="task-label">Duş perdesini kapat</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bath-task"><span class="task-label">Klozeti kapat</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bath-task"><span class="task-label">Banyo kapısını kapat</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+            </div>
+
+            <!-- YATAK ODASI -->
+            <div class="section-title">🛏️ Yatak Odası Kontrolleri</div>
+            <div class="checklist-group">
+                <label class="task-card bed-task"><span class="task-label">Yatak oda çöpü</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bed-task"><span class="task-label">Su kontrolü</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bed-task"><span class="task-label">Yatak altı temizliği</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bed-task"><span class="task-label">Kapı eşik altını temizle</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bed-task"><span class="task-label">Televizyon ve mobilya silinmesi</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bed-task"><span class="task-label">Peçete kontrolü</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+                <label class="task-card bed-task"><span class="task-label">Koku spreyi sık</span><input type="checkbox" class="chk" onchange="checkAll()"></label>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="reset-btn" onclick="resetCurrent()">Bu Odayı Sıfırla</button>
+        </div>
+
+        <!-- Pop-up -->
+        <div class="modal-overlay" id="myModal">
+            <div class="modal-card">
+                <h2>🎉 Temizlik Bitti!</h2>
+                <p id="roomNotice">Oda temizliği başarıyla tamamlandı.</p>
+                <button class="modal-btn" onclick="closeM()">Tamam</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRoomNum = "701";
+
+        function selectTab(btn, roomNum) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRoomNum = roomNum;
+            resetCurrent();
+        }
+
+        function checkAll() {
+            let inputs = document.querySelectorAll('.chk');
+            let allChecked = true;
+            inputs.forEach(i => { if(!i.checked) allChecked = false; });
+
+            if(allChecked) {
+                document.getElementById('roomNotice').innerText = currentRoomNum + " Nolu Oda Temizliği Tamamlandı!";
+                document.getElementById('myModal').style.display = 'flex';
+            }
+        }
+
+        function closeM() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        function resetCurrent() {
+            document.querySelectorAll('.chk').forEach(i => i.checked = false);
+            closeM();
+        }
+    </script>
+</body>
+</html>
