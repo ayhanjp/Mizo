@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="apple-touch-icon" href="Logo.PNG">
+    <title>Mizo Hotel Oda Checklist</title>
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.78);
+            --glass-border: rgba(255, 255, 255, 0.95);
+            --text-main: #1c1c1e;
+            --text-sub: #6e6e73;
+            --card-bg: rgba(255, 255, 255, 0.65);
+            --card-border: rgba(255, 255, 255, 0.85);
+            --tab-bg: rgba(255, 255, 255, 0.9);
+            
+            /* Durum Renkleri */
+            --status-checkout: linear-gradient(135deg, #ff453a, #ff9f0a);
+            --status-stayover: linear-gradient(135deg, #0a84ff, #5e5ce6);
+            --status-stay: linear-gradient(135deg, #30d158, #32ade6);
+
+            --bath-bg: rgba(232, 244, 248, 0.85);
+            --bath-border: rgba(188, 224, 238, 0.9);
+            --bed-bg: rgba(252, 243, 236, 0.85);
+            --bed-border: rgba(248, 220, 208, 0.9);
+        }
+
+        /* Gece Modu (Dark Mode) Değişkenleri */
+        body.dark-mode {
+            background: linear-gradient(135deg, #0b1329 0%, #1a1c29 50%, #0d0f17 100%) !important;
+            --glass-bg: rgba(28, 28, 30, 0.82);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-main: #f2f2f7;
+            --text-sub: #aeaeb2;
+            --card-bg: rgba(44, 44, 46, 0.65);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --tab-bg: rgba(44, 44, 46, 0.9);
+            --bath-bg: rgba(28, 43, 54, 0.85);
+            --bath-border: rgba(41, 75, 96, 0.9);
+            --bed-bg: rgba(54, 38, 28, 0.85);
+            --bed-border: rgba(96, 64, 41, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 50%, #e0c3fc 100%);
+            min-height: 100vh;
+            padding: 12px 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 410px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 36px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            overflow: hidden;
+            padding: 16px 14px 14px 14px;
+            height: 96vh;
+            max-height: 840px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+            color: var(--text-main);
+        }
+
+        header p {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 1px;
+            font-weight: 500;
+        }
+
+        /* Gece Modu Butonu */
+        .theme-toggle-btn {
+            position: absolute;
+            right: 2px;
+            top: 2px;
+            background: var(--tab-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        /* 3'lü Simetrik Oda Grid Düzeni */
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            background: var(--tab-bg);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 8px 2px;
+            border-radius: 13px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2), 0 0 0 3px #007aff;
+            border-color: #007aff;
+        }
+
+        /* Oda Durum Rozetleri */
+        .room-badge {
+            font-size: 9px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.12);
+            color: var(--text-main);
+            letter-spacing: -0.2px;
+        }
+
+        .tab-btn.status-checkout { background: var(--status-checkout) !important; color: #fff !important; border: none !important; }
+        .tab-btn.status-checkout .room-badge { background: rgba(0,0,0,0.25); color: #fff; }
+        .tab-btn.status-checkout.active { box-shadow: 0 8px 18px rgba(255, 69, 58, 0.35), 0 0 0 3px #fff, 0 0 12px rgba(255, 69, 58, 0.8) !important; }
+
+        .tab-btn.status-stayover { background: var(--status-stayover) !important; color: #fff !important; border: none !important; }
+        .tab-btn.status-stayover .room-badge { background: rgba(0,0,0,0.25); color: #fff; }
+        .tab-btn.status-stayover.active { box-shadow: 0 8px 18px rgba(10, 132, 255, 0.35), 0 0 0 3px #fff, 0 0 12px rgba(10, 132, 255, 0.8) !important; }
+
+        .tab-btn.status-stay { background: var(--status-stay) !important; color: #fff !important; border: none !important; }
+        .tab-btn.status-stay .room-badge { background: rgba(0,0,0,0.25); color: #fff; }
+        .tab-btn.status-stay.active { box-shadow: 0 8px 18px rgba(48, 209, 88, 0.35), 0 0 0 3px #fff, 0 0 12px rgba(48, 209, 88, 0.8) !important; }
+
+        .scroll-area {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 2px;
+            padding-bottom: 30px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 11px 13px;
+            margin-bottom: 9px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .status-selector {
+            display: flex;
+            gap: 6px;
+            margin-top: 5px;
+        }
+
+        .status-opt {
+            flex: 1;
+            padding: 8px 4px;
+            border-radius: 11px;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.08);
+            cursor: pointer;
+            background: var(--tab-bg);
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .status-opt.selected-checkout { background: var(--status-checkout) !important; color: white !important; border: none !important; box-shadow: 0 4px 10px rgba(255, 69, 58, 0.3); }
+        .status-opt.selected-stayover { background: var(--status-stayover) !important; color: white !important; border: none !important; box-shadow: 0 4px 10px rgba(10, 132, 255, 0.3); }
+        .status-opt.selected-stay { background: var(--status-stay) !important; color: white !important; border: none !important; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.3); }
+
+        /* Daha Kalın İlerleme Çubuğu */
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 5px;
+        }
+
+        .progress-bar-bg {
+            height: 11px;
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #34c759, #30d158);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .boss-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .gradient-title {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #ff453a, #0a84ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Parlak Degrade ve Büyük Bölüm Başlıkları */
+        .section-title {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 12px 0 6px 4px;
+            letter-spacing: 0.6px;
+            background: linear-gradient(135deg, #007aff, #af52de);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .boss-check-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #248a3d;
+            cursor: pointer;
+        }
+
+        .boss-checkbox {
+            width: 24px;
+            height: 24px;
+            accent-color: #34c759;
+            cursor: pointer;
+        }
+
+        /* Patron Notu: Daha Büyük Font ve Fosforlu Kırmızı Yazı */
+        .boss-input {
+            width: 100%;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 11px;
+            padding: 8px 10px;
+            font-size: 15px;
+            font-weight: 700;
+            background: var(--tab-bg);
+            color: #ff0033;
+            outline: none;
+            resize: none;
+        }
+
+        .checklist-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .task-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 13px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .task-card:active { transform: scale(0.99); }
+        .bath-task { background-color: var(--bath-bg); border-color: var(--bath-border); }
+        .bed-task { background-color: var(--bed-bg); border-color: var(--bed-border); }
+
+        /* İşaretlenmiş Satır (Parlak Modern Yeşil & Beyaz Metin) */
+        .task-card.checked {
+            background: #34c759 !important;
+            border-color: #28a745 !important;
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3) !important;
+        }
+
+        .task-card.checked .task-label {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        .task-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            flex-grow: 1;
+            transition: color 0.2s;
+        }
+
+        .task-card input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #34c759;
+            cursor: pointer;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-shrink: 0;
+            padding-top: 6px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            background: var(--glass-bg);
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+        }
+
+        .complete-btn {
+            background: rgba(52, 199, 89, 0.25);
+            color: #1b632c;
+            border: 1px solid rgba(52, 199, 89, 0.45);
+        }
+
+        .reset-btn {
+            background: rgba(255, 59, 48, 0.2);
+            color: #d70015;
+            border: 1px solid rgba(255, 59, 48, 0.4);
+        }
+
+        /* Modal Pencereleri */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            display: none;
+            border-radius: 36px;
+            z-index: 100;
+        }
+
+        .modal-card {
+            background: var(--tab-bg);
+            color: var(--text-main);
+            width: 85%;
+            padding: 24px;
+            border-radius: 26px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+            border: 1px solid var(--glass-border);
+        }
+
+        .modal-btn {
+            background: #34c759;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 14px;
+            margin-top: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ses Dosyaları -->
+    <audio id="bellSound" src="bell.wav" preload="auto"></audio>
+
+    <div class="phone-container">
+        <header>
+            <h1>Mizo Hotel Oda Checklist</h1>
+            <p>Hızlı & Kusursuz Temizlik Takibi</p>
+            <!-- Gece / Gündüz Modu Butonu -->
+            <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+        </header>
+
+        <!-- Üst Oda Seçim Grid Düzeni (Durum Rozetli) -->
+        <div class="room-grid" id="roomTabs">
+            <button class="tab-btn active" id="tab-701" onclick="selectTab(this, '701')">701<span class="room-badge" id="badge-701">-</span></button>
+            <button class="tab-btn" id="tab-702" onclick="selectTab(this, '702')">702<span class="room-badge" id="badge-702">-</span></button>
+            <button class="tab-btn" id="tab-703" onclick="selectTab(this, '703')">703<span class="room-badge" id="badge-703">-</span></button>
+            <button class="tab-btn" id="tab-704" onclick="selectTab(this, '704')">704<span class="room-badge" id="badge-704">-</span></button>
+            <button class="tab-btn" id="tab-705" onclick="selectTab(this, '705')">705<span class="room-badge" id="badge-705">-</span></button>
+            <button class="tab-btn" id="tab-707" onclick="selectTab(this, '707')">707<span class="room-badge" id="badge-707">-</span></button>
+            <button class="tab-btn" id="tab-708" onclick="selectTab(this, '708')">708<span class="room-badge" id="badge-708">-</span></button>
+            <button class="tab-btn" id="tab-709" onclick="selectTab(this, '709')">709<span class="room-badge" id="badge-709">-</span></button>
+            <button class="tab-btn" id="tab-710" onclick="selectTab(this, '710')">710<span class="room-badge" id="badge-710">-</span></button>
+        </div>
+
+        <div class="scroll-area">
+            <div class="card-box">
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-sub);">📌 ODA DURUMU SEÇİNİZ</div>
+                <div class="status-selector">
+                    <div class="status-opt" id="opt-checkout" onclick="setStatus('checkout')">Checkout<br>(퇴실)</div>
+                    <div class="status-opt" id="opt-stayover" onclick="setStatus('stayover')">Stayover<br>(연박)</div>
+                    <div class="status-opt" id="opt-stay" onclick="setStatus('stay')">Stay<br>(재실)</div>
+                </div>
+            </div>
+
+            <div class="card-box">
+                <div class="progress-header">
+                    <span>Tamamlanan</span>
+                    <span id="progressText">%0</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+            </div>
+
+            <div class="card-box">
+                <div class="boss-header-row">
+                    <div class="gradient-title">💬 Patron Talimatı / Özel Not</div>
+                    <label class="boss-check-wrap">
+                        <span>Tamamlandı</span>
+                        <input type="checkbox" class="boss-checkbox" id="bossDoneChk" onchange="saveAndCheck()">
+                    </label>
+                </div>
+                <textarea class="boss-input" id="bossNotes" rows="2" placeholder="" oninput="saveRoomData()"></textarea>
+            </div>
+
+            <div class="section-title">🚿 Banyo Kontrolleri</div>
+            <div class="checklist-group">
+                <label class="task-card bath-task"><span class="task-label">Havlular</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bath-task"><span class="task-label">Duş Süngeri</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bath-task"><span class="task-label">Sabun, Şampuan ve Duş Jeli</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bath-task"><span class="task-label">Banyo Çöpü</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bath-task"><span class="task-label">Aynaları Sil</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bath-task"><span class="task-label">Duş Perdesini Kapat</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bath-task"><span class="task-label">Klozeti Kapat</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bath-task"><span class="task-label">Banyo Kapısını Kapat</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+            </div>
+
+            <div class="section-title">🛏️ Yatak Odası Kontrolleri</div>
+            <div class="checklist-group">
+                <label class="task-card bed-task"><span class="task-label">Yatak Oda Çöpü</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bed-task"><span class="task-label">Su</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bed-task"><span class="task-label">Yatak Altı Temizliği</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bed-task"><span class="task-label">Kapı Eşik Altını Temizle</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bed-task"><span class="task-label">Mobilya ve Tv</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bed-task"><span class="task-label">Peçete</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+                <label class="task-card bed-task"><span class="task-label">Oda Spreyi</span><input type="checkbox" class="chk" onchange="saveAndCheck()"></label>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="action-btn complete-btn" onclick="completeAll()">Tümünü İşaretle</button>
+            <button class="action-btn reset-btn" onclick="resetCurrent()">Odayı Sıfırla</button>
+        </div>
+
+        <!-- Tek Oda Bitti Bildirim Modalı -->
+        <div class="modal-overlay" id="myModal">
+            <div class="modal-card">
+                <h2>🎉 Temizlik Bitti!</h2>
+                <p id="roomNotice" style="margin-top: 8px; font-size: 14px; color: var(--text-sub);">Oda temizliği başarıyla tamamlandı.</p>
+                <button class="modal-btn" onclick="closeM()">Tamam</button>
+            </div>
+        </div>
+
+        <!-- Tüm Otel Odaları Bitti Kutlama Modalı -->
+        <div class="modal-overlay" id="hotelModal">
+            <div class="modal-card" style="border: 2px solid #34c759;">
+                <h1 style="font-size: 28px;">🏆 HARİKA İŞ!</h1>
+                <p style="margin-top: 10px; font-size: 15px; font-weight: 600; color: #34c759;">Tüm Otel Odalarının Temizliği Eksiksiz Tamamlandı!</p>
+                <button class="modal-btn" style="background: #007aff; width: 100%; margin-top: 18px;" onclick="closeHotelModal()">Harika</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRoomNum = "701";
+        let currentStatus = "";
+
+        // Web Audio API ile iPhone'da kusursuz çalışan mini geri bildirim sesi (Titreşim yerine)
+        function playClickFeedback() {
+            try {
+                let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = 600;
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) {}
+        }
+
+        // Gece / Gündüz Modu Değiştirme
+        function toggleTheme() {
+            playClickFeedback();
+            document.body.classList.toggle('dark-mode');
+            let isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('themeBtn').innerText = isDark ? "☀️" : "🌙";
+            localStorage.setItem('mizo_dark_mode', isDark ? '1' : '0');
+        }
+
+        function loadTheme() {
+            if (localStorage.getItem('mizo_dark_mode') === '1') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeBtn').innerText = "☀️";
+            }
+        }
+
+        function playSuccessSound() {
+            let sound = document.getElementById('bellSound');
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(err => console.log("Ses çalma hatası:", err));
+            }
+        }
+
+        function selectTab(btn, roomNum) {
+            playClickFeedback();
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRoomNum = roomNum;
+            loadRoomData();
+        }
+
+        function setStatus(status) {
+            playClickFeedback();
+            currentStatus = status;
+            updateStatusUI();
+            saveRoomData();
+        }
+
+        function updateStatusUI() {
+            document.getElementById('opt-checkout').className = "status-opt" + (currentStatus === 'checkout' ? ' selected-checkout' : '');
+            document.getElementById('opt-stayover').className = "status-opt" + (currentStatus === 'stayover' ? ' selected-stayover' : '');
+            document.getElementById('opt-stay').className = "status-opt" + (currentStatus === 'stay' ? ' selected-stay' : '');
+        }
+
+        function saveAndCheck() {
+            playClickFeedback();
+            updateProgress();
+            saveRoomData();
+        }
+
+        function updateProgress() {
+            let inputs = document.querySelectorAll('.chk');
+            let bossChk = document.getElementById('bossDoneChk');
+            
+            let totalItems = inputs.length + 1;
+            let checkedCount = 0;
+            
+            inputs.forEach(i => {
+                let card = i.closest('.task-card');
+                if(i.checked) {
+                    checkedCount++;
+                    card.classList.add('checked');
+                } else {
+                    card.classList.remove('checked');
+                }
+            });
+
+            if (bossChk.checked) {
+                checkedCount++;
+            }
+            
+            let percent = Math.round((checkedCount / totalItems) * 100);
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').innerText = '%' + percent;
+
+            let tabBtn = document.getElementById('tab-' + currentRoomNum);
+            let badge = document.getElementById('badge-' + currentRoomNum);
+            let baseNum = currentRoomNum;
+            let wasCompleted = tabBtn.innerText.includes('✓');
+
+            if (percent === 100) {
+                badge.innerText = "✓ BİTTİ";
+                badge.style.background = "#34c759";
+                badge.style.color = "#fff";
+
+                if (totalItems > 0) {
+                    document.getElementById('roomNotice').innerText = currentRoomNum + " Nolu Oda Temizliği Tamamlandı!";
+                    document.getElementById('myModal').style.display = 'flex';
+                    if (!wasCompleted) {
+                        playSuccessSound();
+                    }
+                    // Anlık olarak tüm otelin bitip bitmediğini kontrol et ve kutlamayı tetikle
+                    checkAllHotelCompleted();
+                }
+            } else {
+                updateBadgeText(badge, currentStatus);
+            }
+
+            tabBtn.classList.remove('status-checkout', 'status-stayover', 'status-stay');
+            if (currentStatus) {
+                tabBtn.classList.add('status-' + currentStatus);
+            }
+        }
+
+        function updateBadgeText(badgeEl, status) {
+            if (status === 'checkout') badgeEl.innerText = "CHECKOUT";
+            else if (status === 'stayover') badgeEl.innerText = "STAYOVER";
+            else if (status === 'stay') badgeEl.innerText = "STAY";
+            else badgeEl.innerText = "SEÇİMSİZ";
+            badgeEl.style.background = "rgba(0,0,0,0.12)";
+            badgeEl.style.color = "var(--text-main)";
+        }
+
+        // Tüm Otel Odalarının Tamamlanma Kontrolü (Garanti Tetikleme)
+        function checkAllHotelCompleted() {
+            let rooms = ['701', '702', '703', '704', '705', '707', '708', '709', '710'];
+            let allFinished = true;
+
+            rooms.forEach(r => {
+                let saved = localStorage.getItem('mizo_room_v2_' + r);
+                if (saved) {
+                    let d = JSON.parse(saved);
+                    let finished = d.checkboxes && d.checkboxes.every(val => val === true) && d.bossDone === true;
+                    if (!finished) allFinished = false;
+                } else {
+                    allFinished = false;
+                }
+            });
+
+            if (allFinished) {
+                setTimeout(() => {
+                    document.getElementById('hotelModal').style.display = 'flex';
+                }, 500);
+            }
+        }
+
+        function completeAll() {
+            playClickFeedback();
+            document.querySelectorAll('.chk').forEach(i => i.checked = true);
+            document.getElementById('bossDoneChk').checked = true;
+            saveAndCheck();
+        }
+
+        function saveRoomData() {
+            let inputs = document.querySelectorAll('.chk');
+            let states = [];
+            inputs.forEach(i => states.push(i.checked));
+
+            let data = {
+                status: currentStatus,
+                checkboxes: states,
+                notes: document.getElementById('bossNotes').value,
+                bossDone: document.getElementById('bossDoneChk').checked
+            };
+
+            localStorage.setItem('mizo_room_v2_' + currentRoomNum, JSON.stringify(data));
+            loadAllTabBadges();
+        }
+
+        function loadRoomData() {
+            let savedData = localStorage.getItem('mizo_room_v2_' + currentRoomNum);
+            let inputs = document.querySelectorAll('.chk');
+
+            if (savedData) {
+                let data = JSON.parse(savedData);
+                currentStatus = data.status || "";
+                document.getElementById('bossNotes').value = data.notes || "";
+                document.getElementById('bossDoneChk').checked = data.bossDone || false;
+
+                if (data.checkboxes) {
+                    inputs.forEach((i, index) => {
+                        i.checked = data.checkboxes[index] || false;
+                    });
+                }
+            } else {
+                currentStatus = "";
+                document.getElementById('bossNotes').value = "";
+                document.getElementById('bossDoneChk').checked = false;
+                inputs.forEach(i => i.checked = false);
+            }
+
+            updateStatusUI();
+            updateProgress();
+            closeM();
+        }
+
+        function closeM() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        function closeHotelModal() {
+            document.getElementById('hotelModal').style.display = 'none';
+        }
+
+        function resetCurrent() {
+            playClickFeedback();
+            localStorage.removeItem('mizo_room_v2_' + currentRoomNum);
+            loadRoomData();
+            loadAllTabBadges();
+        }
+
+        function loadAllTabBadges() {
+            let rooms = ['701', '702', '703', '704', '705', '707', '708', '709', '710'];
+            rooms.forEach(r => {
+                let saved = localStorage.getItem('mizo_room_v2_' + r);
+                let tab = document.getElementById('tab-' + r);
+                let badge = document.getElementById('badge-' + r);
+                
+                tab.className = "tab-btn" + (r === currentRoomNum ? " active" : "");
+
+                if (saved) {
+                    let d = JSON.parse(saved);
+                    if (d.status) tab.classList.add('status-' + d.status);
+                    
+                    let allChecked = d.checkboxes && d.checkboxes.every(val => val === true) && d.bossDone === true;
+                    if (allChecked) {
+                        badge.innerText = "✓ BİTTİ";
+                        badge.style.background = "#34c759";
+                        badge.style.color = "#fff";
+                    } else {
+                        updateBadgeText(badge, d.status);
+                    }
+                } else {
+                    updateBadgeText(badge, "");
+                }
+            });
+            let activeTab = document.getElementById('tab-' + currentRoomNum);
+            if(activeTab) activeTab.classList.add('active');
+        }
+
+        window.onload = function() {
+            loadTheme();
+            loadAllTabBadges();
+            loadRoomData();
+        }
+    </script>
+</body>
+</html>
